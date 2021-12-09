@@ -14,9 +14,9 @@ import pandas as pd
 from copy import deepcopy
 
 
-# # For local testing 
-# cwd = os.getcwd()
-# test_file = BNReasoner.BNReasoner(net = f'{cwd}/testing/dog_problem.BIFXML')
+# For local testing 
+cwd = os.getcwd()
+test_file = BNReasoner.BNReasoner(net = f'{cwd}/testing/dog_problem.BIFXML')
 
 # Function to compare edges between nodes, always returns at least 1 since two connected nodes share an edge to each other
 def filter_(x, y):
@@ -27,12 +27,13 @@ def filter_(x, y):
     return count
 
 # Function to return the order, takes the graph file and heuristic as input
-def get_order(graph, heuristic):
+def get_order(graph, heuristic, query = []):
 
     # Gets the interaction graph and stores the original version for later comparison
     graph = graph
     interaction_graph = graph.bn.get_interaction_graph()
     original_interaction_graph = graph.bn.get_interaction_graph()
+    original_interaction_graph.remove_nodes_from(query)
 
     order = []
 
@@ -40,13 +41,13 @@ def get_order(graph, heuristic):
     if heuristic == 'min_degree':
 
         # For the amount of nodes in the interaction graph..
-        length = len(list(interaction_graph.nodes))
+        length = len(list(original_interaction_graph.nodes))
         for i in range(length):
             
             # Get the degrees (adjacent nodes)
             interaction_graph = graph.bn.get_interaction_graph()
             degrees = dict(interaction_graph.degree)
-
+            
             # And sort the degrees (adjacent nodes) based on number of edges 
             sorted_degrees = dict(sorted(degrees.items(), key=lambda item: item[1]))
             
@@ -58,10 +59,24 @@ def get_order(graph, heuristic):
                 # For some reason with one of the example files, it added a previously deleted node to the order list 'winter', so if there are more items in the order list than there are actual nodes, delete the last item which does not belong there
                 if len(order) > len(list(original_interaction_graph.nodes)):
                     order.pop(-1)
+
+                
+                for i in range(len(query)):
+                    if query[i] in order:
+                        order.remove(query[i])
+                
                 return order
 
             # The node with minimal amount of degrees is the first item of the sorted dictionary. Then you get its adjacent nodes, which returns a dictionary, and you take the key values for the actual node names
-            min_degree_node = next(iter(sorted_degrees))
+            
+            for x in sorted_degrees.keys():
+                min_degree_node = next(iter(sorted_degrees))
+                if min_degree_node in query:
+                    continue
+                else:
+                    break
+
+
             min_node_adjacents = interaction_graph.adj[min_degree_node]
             adjacents = list(min_node_adjacents.keys())
             
@@ -90,18 +105,27 @@ def get_order(graph, heuristic):
                 
                 # After the edges are added, we can safely delete the node and store it as our (next) node in the order list
                 graph.bn.del_var(min_degree_node)
-                order.append(str(min_degree_node))
+                if min_degree_node not in query:
+                    order.append(str(min_degree_node))
             
             # If there is there is just one adjacent node, it could mean that we've reached the final node, so we add that last node to our order list and return it, stopping the function
             else:
                 if len(list(interaction_graph.nodes)) == 1:
-                    order.extend(list(interaction_graph.nodes))
+                    if min_degree_node not in query:
+                        order.extend(list(interaction_graph.nodes))
+
+                    
+                    for i in range(len(query)):
+                        if query[i] in order:
+                            order.remove(query[i])
+                    
                     return order
 
                 # However, in all other cases it just means no edges need to be added as there is only one adjacent node  
                 else:
                     graph.bn.del_var(min_degree_node)
-                    order.append(str(min_degree_node))
+                    if min_degree_node not in query:
+                        order.append(str(min_degree_node))
 
     # Min_fill heuristic
     elif heuristic == 'min_fill':
@@ -116,7 +140,9 @@ def get_order(graph, heuristic):
             # This is ugly but true: this entire function was written for dog_problem, and worked. But the other examples went past the length of the amount of nodes, this is a failsafe
             # So if this entire loop is run the amount of times that there are nodes, the entire function is stopped, and the last remaining node is added to the order list
             if i == length - 1:
-                order.extend(list(interaction_graph.nodes))
+
+                if current_least_edges not in query:
+                    order.extend(list(interaction_graph.nodes))
                 if len(order) > len(list(original_interaction_graph.nodes)):
                     order.pop(-1)
                 return order
@@ -224,3 +250,9 @@ def get_order(graph, heuristic):
         print(f'Given heuristic \'{heuristic}\' does not match min-degree or min-fill, exiting..')
 
 
+# interaction_graph = test_file.bn.get_interaction_graph()
+# degrees = dict(interaction_graph.degree)
+# print(degrees)
+
+# print()
+print(get_order(test_file, 'min_degree', query = ['light-on']))
