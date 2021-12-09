@@ -37,24 +37,6 @@ class BNReasoner:
             lista.append(z)
         return z
 
-        #if len(self.bn.get_cpt(variable_1)) > len(self.bn.get_cpt(variable_2)):
-        #    x = self.bn.get_cpt(variable_2)
-        #    y = self.bn.get_cpt(variable_1)
-        #else:
-        #    x = self.bn.get_cpt(variable_1)
-        #    y = self.bn.get_cpt(variable_2)
-        #new = y.drop("p", axis = 1)
-        #f = []
-        #for index, row in x.iterrows():
-        #    for inex, rw in y.iterrows():
-        #        if row[variable_1] == rw[variable_1]:
-        #            factor = row['p'] * rw["p"]
-        #            f.append(factor)
-        #new["factor"] = f
-        #print(new)
-
-
-
     def summing_out(self, cpt, variable):
         df = cpt.drop(variable, axis = 1)
         d = df.columns[-1]
@@ -64,12 +46,6 @@ class BNReasoner:
         return df_new
 
     def maxing_out(self, cpt, variable):
-        #df = cpt.drop(variable, axis = 1)
-        #d = df.columns[-1]
-        #agg = {d: 'max'}
-        #groups = df.columns.to_list()[:-1]
-        #df_new = cpt.groupby(groups, as_index=False).aggregate(agg).reindex(columns=cpt.columns)
-
         df_other = cpt.loc[cpt.groupby('Sprinkler?')[cpt.columns[-1]].idxmax()].reset_index(drop=True)
         df_other["instantiation"] = f"{variable} =" + df_other[variable].astype(str)
         df_other = df_other.drop(variable, axis =1 )
@@ -91,10 +67,6 @@ class BNReasoner:
             y.append(factor)
             x = y
         return x
-
-
-
-
 
     def get_variables_from_order(self, variable):
         x = self.bn.get_children(variable)
