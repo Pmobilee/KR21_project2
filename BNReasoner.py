@@ -163,13 +163,18 @@ class BNReasoner:
     
     def pruning(self, x, y, z):
 
+        if isinstance(z,str):
+            z1 = []
+            z1.insert(0,z)
+        else:
+            z1 = z
         #pruning leaf nodes
         for variable in self.bn.get_all_variables():
-            if self.bn.get_children(variable)==[] and variable not in x and variable not in y and variable not in z:
+            if self.bn.get_children(variable)==[] and variable not in x and variable not in y and variable not in z1:
                 self.bn.del_var(variable)
         
         #edge pruning
-        for var in z:
+        for var in z1:
             for edge_end in self.bn.get_children(var):
                 self.bn.del_edge([var, edge_end])
 
