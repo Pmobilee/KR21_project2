@@ -1,3 +1,6 @@
+from typing import Union
+from BayesNet import BayesNet
+
 
 from typing import Union
 from BayesNet import BayesNet
@@ -65,10 +68,22 @@ class BNReasoner:
                         else:
                             closed_valve.append(False)
                     if path[count+1] in self.get_parents(path[count]): #convergent
-                        if path[count] not in given:
-                            closed_valve.append(True)
-                        else:
+                        if path[count] in given:
                             closed_valve.append(False)
+                        else:
+                            conv=path[count]
+                            closed_convergent_valve = True
+                            while not not self.bn.get_children(conv):
+                                for children in self.bn.get_children(conv):
+                                    if children in given:
+                                        closed_valve.append(False)
+                                        closed_convergent_valve = False
+                                        br=True
+                                        break
+                                if br==True:
+                                    break
+                            if closed_convergent_valve == True:
+                                closed_valve.append(True)
                             
                 if path[count] in self.get_parents(node):
                     if path[count+1] in self.bn.get_children(path[count]): #divergent valve
