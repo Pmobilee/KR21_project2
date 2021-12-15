@@ -1,10 +1,10 @@
 from typing import Union
 from BayesNet import BayesNet
+import pandas as pd
 
 
 from typing import Union
 from BayesNet import BayesNet
-import pandas as pd
 
 
 class BNReasoner:
@@ -126,7 +126,7 @@ class BNReasoner:
         return closed_valve, closed_path, d_sep
     
     
-    def pruning(self, x, y, z):
+    def pruning(self, x, y, z, truth_value):
 
         if isinstance(z,str):
             z1 = []
@@ -140,6 +140,9 @@ class BNReasoner:
         
         #edge pruning
         for var in z1:
+            for child in self.bn.get_children(var):
+                new_cpt = self.bn.get_compatible_instantiations_table( pd.Series({var:truth_value}), self.bn.structure.nodes[child]['cpt'])
+                self.bn.structure.nodes[child]["cpt"] = new_cpt
             for edge_end in self.bn.get_children(var):
                 self.bn.del_edge([var, edge_end])
 
@@ -147,6 +150,7 @@ class BNReasoner:
 
 
     def multi_factor(self, lista):
+
         while len(lista) > 1:
             x = lista[0]
             y = lista[1]
@@ -202,29 +206,29 @@ class BNReasoner:
         return x
 
     def posterior_marginals(self, order:list, evidence):
-        thing = self.bn.get_all_cpts()
+        all = self.bn.get_all_cpts()
+        x = list(all.values())
+
         for key, value in evidence.items():
-            for key_1, value_1 in thing.items():
-                if key in value_1.columns:
-                    value_1.drop(value_1.index[value_1[key] != value], inplace=True)
-                    value_1.reset_index()
+            i = 0
+            for cpt in x:
+                if key in cpt.columns.tolist():
+                    new = cpt[cpt[key] == value]
+                    x[i] =new
+                i+=1
 
         for variable in order:
-            mention_keys = []
             mention = []
-
-            for key, df in thing.items():
-                if variable in df.columns.tolist():
-                    mention.append(df)
-                    mention_keys.append(key)
-
+            for cpt in x:
+                if variable in cpt.columns.tolist():
+                    mention.append(cpt)
             factor = self.summing_out(self.multi_factor(mention),variable)
-            for s in mention_keys:
-                thing.pop(s)
-            sum = factor["factor"].sum()
-            factor["factor"] = factor["factor"].values/sum
-            nm = ' '.join(mention_keys)
-            name = f" Sigma {variable} factor {nm}"
-            thing[name] = factor
-
-        return thing
+            y = []
+            for cpt in x:
+                if variable not in cpt.columns.tolist():
+                    y.append(cpt)
+            y.append(factor)
+            x = y
+        sum = x["factor"].sum(axis=0, skipna=True)
+        x["factor"] = x["factor"].values/sum
+        return x
