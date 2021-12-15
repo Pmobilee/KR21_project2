@@ -1,4 +1,4 @@
-<<<<<<< Updated upstream
+
 from typing import Union
 from BayesNet import BayesNet
 
@@ -17,9 +17,9 @@ class BNReasoner:
             self.bn = net
 
     # TODO: This is where your methods should go
+    def get_parents(self, variable: str):
 
-
-
+        return [c for c in self.bn.structure.predecessors(variable)]
 
     
     def find_all_paths(self, start, end, path=[]):
@@ -35,7 +35,7 @@ class BNReasoner:
     #If the end is not there, start search for each of these variables
     #until the end is found
     
-        for node in self.bn.get_children(start)+self.bn.get_parents(start):
+        for node in self.bn.get_children(start)+self.get_parents(start):
             if node not in path:
                 newpaths = self.find_all_paths(node, end, path)
                 for newpath in newpaths:
@@ -64,19 +64,19 @@ class BNReasoner:
                             closed_valve.append(True)
                         else:
                             closed_valve.append(False)
-                    if path[count+1] in self.bn.get_parents(path[count]): #convergent
+                    if path[count+1] in self.get_parents(path[count]): #convergent
                         if path[count] not in given:
                             closed_valve.append(True)
                         else:
                             closed_valve.append(False)
                             
-                if path[count] in self.bn.get_parents(node):
+                if path[count] in self.get_parents(node):
                     if path[count+1] in self.bn.get_children(path[count]): #divergent valve
                         if path[count] in given:
                             closed_valve.append(True)
                         else:
                             closed_valve.append(False)
-                    if path[count+1] in self.bn.get_parents(path[count]): #sequential
+                    if path[count+1] in self.get_parents(path[count]): #sequential
                         if path[count] in given:
                             closed_valve.append(True)
                         else:
@@ -213,5 +213,3 @@ class BNReasoner:
         sum = x["factor"].sum(axis=0, skipna=True)
         x["factor"] = x["factor"].values/sum
         return x
-
->>>>>>> Stashed changes
