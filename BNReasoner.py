@@ -1,6 +1,7 @@
 
 from typing import Union
 from BayesNet import BayesNet
+import pandas as pd
 
 
 class BNReasoner:
@@ -131,7 +132,6 @@ class BNReasoner:
 
 
     def multi_factor(self, lista):
-
         while len(lista) > 1:
             x = lista[0]
             y = lista[1]
@@ -187,29 +187,29 @@ class BNReasoner:
         return x
 
     def posterior_marginals(self, order:list, evidence):
-        all = self.bn.get_all_cpts()
-        x = list(all.values())
-
+        thing = self.bn.get_all_cpts()
         for key, value in evidence.items():
-            i = 0
-            for cpt in x:
-                if key in cpt.columns.tolist():
-                    new = cpt[cpt[key] == value]
-                    x[i] =new
-                i+=1
+            for key_1, value_1 in thing.items():
+                if key in value_1.columns:
+                    value_1.drop(value_1.index[value_1[key] != value], inplace=True)
+                    value_1.reset_index()
 
         for variable in order:
+            mention_keys = []
             mention = []
-            for cpt in x:
-                if variable in cpt.columns.tolist():
-                    mention.append(cpt)
+
+            for key, df in thing.items():
+                if variable in df.columns.tolist():
+                    mention.append(df)
+                    mention_keys.append(key)
+
             factor = self.summing_out(self.multi_factor(mention),variable)
-            y = []
-            for cpt in x:
-                if variable not in cpt.columns.tolist():
-                    y.append(cpt)
-            y.append(factor)
-            x = y
-        sum = x["factor"].sum(axis=0, skipna=True)
-        x["factor"] = x["factor"].values/sum
-        return x
+            for s in mention_keys:
+                thing.pop(s)
+            sum = factor["factor"].sum()
+            factor["factor"] = factor["factor"].values/sum
+            nm = ' '.join(mention_keys)
+            name = f" Sigma {variable} factor {nm}"
+            thing[name] = factor
+
+        return thing
