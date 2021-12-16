@@ -142,9 +142,10 @@ class BNReasoner:
             
             for child in self.bn.get_children(var):
                 new_cpt = self.bn.get_compatible_instantiations_table( pd.Series({var:truth_value[count]}), self.bn.structure.nodes[child]['cpt'])
+                new_cpt = new_cpt.drop(var,axis=1).reset_index(drop=True)
                 self.bn.structure.nodes[child]["cpt"] = new_cpt
             new_cpt = self.bn.get_compatible_instantiations_table( pd.Series({var:truth_value[count]}), self.bn.structure.nodes[var]['cpt'])
-            self.bn.structure.nodes[var]["cpt"] = new_cpt
+            self.bn.structure.nodes[var]["cpt"] = new_cpt.reset_index(drop=True)
             
             for edge_end in self.bn.get_children(var):
                 self.bn.del_edge([var, edge_end])
@@ -243,6 +244,7 @@ class BNReasoner:
         return thing
 
     def MEP(self,evidence,order):
+        self.pruning([],[],evidence.index,evidence.values)
         z = self.bn.get_all_cpts()
         ins = []
         for key, value in evidence.items():
