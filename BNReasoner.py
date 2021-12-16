@@ -137,17 +137,18 @@ class BNReasoner:
                 self.bn.del_var(variable)
         
         #edge pruning
+        count = 0
         for var in z1:
             
             for child in self.bn.get_children(var):
-                new_cpt = self.bn.get_compatible_instantiations_table( pd.Series({var:truth_value}), self.bn.structure.nodes[child]['cpt'])
+                new_cpt = self.bn.get_compatible_instantiations_table( pd.Series({var:truth_value[count]}), self.bn.structure.nodes[child]['cpt'])
                 self.bn.structure.nodes[child]["cpt"] = new_cpt
-            new_cpt = self.bn.get_compatible_instantiations_table( pd.Series({var:truth_value}), self.bn.structure.nodes[var]['cpt'])
+            new_cpt = self.bn.get_compatible_instantiations_table( pd.Series({var:truth_value[count]}), self.bn.structure.nodes[var]['cpt'])
             self.bn.structure.nodes[var]["cpt"] = new_cpt
             
             for edge_end in self.bn.get_children(var):
                 self.bn.del_edge([var, edge_end])
-
+            count +=1
         return self
 
 
