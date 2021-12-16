@@ -1,10 +1,8 @@
 from typing import Union
 from BayesNet import BayesNet
 import pandas as pd
+from copy import deepcopy
 
-
-from typing import Union
-from BayesNet import BayesNet
 
 
 class BNReasoner:
@@ -154,14 +152,12 @@ class BNReasoner:
 
 
     def multi_factor(self, lista):
-
         while len(lista) > 1:
             x = lista[0]
             y = lista[1]
-            new = []
             overlapping_labels = x.columns[:-1].intersection(y.columns[:-1])
             overlapping_labels = overlapping_labels.tolist()
-            if x.columns[-1] != "p":
+            if "p" not in x.columns:
                 x.rename(columns={x.columns[-1]: 'p'}, inplace=True)
             if y.columns[-1] != "p":
                 y.rename(columns={y.columns[-1]: 'p'}, inplace=True)
@@ -171,7 +167,7 @@ class BNReasoner:
             lista.pop(0)
             lista.pop(0)
             lista.append(z)
-        return z
+        return lista[0]
 
     def summing_out(self, cpt, variable):
         df = cpt.drop(variable, axis = 1)
@@ -181,11 +177,19 @@ class BNReasoner:
         df_new = df.groupby(groups, as_index=False).aggregate(agg).reindex(columns=df.columns)
         return df_new
 
-    def maxing_out(self, cpt, variable):  #this is not really working I think for everything but is only needed for MAP and MPE
-        df_other = cpt.loc[cpt.groupby('Sprinkler?')[cpt.columns[-1]].idxmax()].reset_index(drop=True)
-        df_other["instantiation"] = f"{variable} =" + df_other[variable].astype(str)
-        df_other = df_other.drop(variable, axis =1 )
-        return df_other
+    def maxing_out(self, cpt,variable):
+        if 'p' in list(cpt.columns):
+            cpt.rename(columns={"p": "factor"}, inplace=True)
+        colssa = list(cpt.columns)
+        colss = list(cpt.columns)
+        colss.remove('factor')
+        if len(colss) > 1:
+            colss.remove(variable)
+            colssa.remove(variable)
+        b = cpt
+        b = b.loc[b.groupby(colss)["factor"].idxmax()].reset_index(drop=True)
+        cpt = cpt.groupby(colss)["factor"].agg('max').reset_index()
+        return b, cpt
 
     def prior_marginals(self, order:list):
         all = self.bn.get_all_cpts()
@@ -209,30 +213,78 @@ class BNReasoner:
         x.append(variable)
         return x
 
-    def posterior_marginals(self, order:list, evidence):
-        all = self.bn.get_all_cpts()
-        x = list(all.values())
-
+    def posterior_marginals(self, order: list, evidence):
+        thing = self.bn.get_all_cpts()
         for key, value in evidence.items():
-            i = 0
-            for cpt in x:
-                if key in cpt.columns.tolist():
-                    new = cpt[cpt[key] == value]
-                    x[i] =new
-                i+=1
+            for key_1, value_1 in thing.items():
+                if key in value_1.columns:
+                    value_1.drop(value_1.index[value_1[key] != value], inplace=True)
+                    value_1.reset_index()
 
         for variable in order:
+            mention_keys = []
             mention = []
-            for cpt in x:
-                if variable in cpt.columns.tolist():
-                    mention.append(cpt)
-            factor = self.summing_out(self.multi_factor(mention),variable)
-            y = []
-            for cpt in x:
-                if variable not in cpt.columns.tolist():
-                    y.append(cpt)
-            y.append(factor)
-            x = y
-        sum = x["factor"].sum(axis=0, skipna=True)
-        x["factor"] = x["factor"].values/sum
-        return x
+
+            for key, df in thing.items():
+                if variable in df.columns.tolist():
+                    mention.append(df)
+                    mention_keys.append(key)
+
+            factor = self.summing_out(self.multi_factor(mention), variable)
+            for s in mention_keys:
+                thing.pop(s)
+            sum = factor["factor"].sum()
+            factor["factor"] = factor["factor"].values / sum
+            nm = ' '.join(mention_keys)
+            name = f"Sigma {variable} factor {nm}"
+            thing[name] = factor
+
+        return thing
+
+    def MEP(self,evidence,order):
+        z = self.bn.get_all_cpts()
+        ins = []
+        for key, value in evidence.items():
+            for keys, values in z.items():
+                if key in values.columns:
+                    values.drop(values.index[values[keys] != value], inplace=True)
+                    values.reset_index()
+        for variable in order:
+            mention = []
+            mention_keys = []
+            for key, df in z.items():
+                if variable in df.columns.tolist():
+                    mention.append(df)
+                    mention_keys.append(key)
+            instant, factor = self.maxing_out(self.multi_factor(mention), variable)
+            instant.pop('factor')
+            for s in mention_keys:
+                z.pop(s)
+            nm = ' '.join(mention_keys)
+            name = f" MAX {variable} factor {nm}"
+            z[name] = factor
+            ins.append(instant)
+        while len(ins) > 1:
+            x = ins[0]
+            y = ins[1]
+            if len(x.columns.intersection(y.columns)) > 0:
+                overlapping_labels = x.columns.intersection(y.columns)
+                overlapping_labels = overlapping_labels.tolist()
+                a = x.merge(y, on=overlapping_labels, how="inner")
+                ins.append(a)
+                ins.pop(1)
+                ins.pop(0)
+                continue
+            if len(x.columns.intersection(y.columns)) == 0:
+                a = x.join(y)
+                ins.append(a)
+                ins.pop(1)
+                ins.pop(0)
+                continue
+        b = 1
+        while len(z) > 0:
+            a = list(z.values())[0]["factor"]
+            b *= a.at[0]
+            z.pop(list(z.keys())[0])
+        return b,ins
+
