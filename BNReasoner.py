@@ -180,6 +180,7 @@ class BNReasoner:
         return df_new
 
     def maxing_out(self, cpt,variable):
+        row = len(cpt.index)
         if 'p' in list(cpt.columns):
             cpt.rename(columns={"p": "factor"}, inplace=True)
         colssa = list(cpt.columns)
@@ -191,6 +192,9 @@ class BNReasoner:
         b = cpt
         b = b.loc[b.groupby(colss)["factor"].idxmax()].reset_index(drop=True)
         cpt = cpt.groupby(colss)["factor"].agg('max').reset_index()
+        if row == len(cpt.index):
+            cpt = cpt[cpt['factor'] == cpt[ 'factor'].max()]
+            b = deepcopy(cpt)
         return b, cpt
 
     def prior_marginals(self, order:list):
@@ -243,30 +247,80 @@ class BNReasoner:
 
         return thing
 
-    def MEP(self,evidence,order):
-        self.pruning([],[],evidence.index,evidence.values)
+#    def MPE(self,evidence,order):
+#        self.pruning([],[],evidence.index,evidence.values)
+#        z = self.bn.get_all_cpts()
+#        ins = []
+#        for variable in order:
+#            mention = []
+#            mention_keys = []
+#            for key, df in z.items():
+#                if variable in df.columns.tolist():
+#                    mention.append(df)
+#                    mention_keys.append(key)
+#            instant, factor = self.maxing_out(self.multi_factor(mention), variable)
+#            instant.pop('factor')
+#            for s in mention_keys:
+#                z.pop(s)
+#            nm = ' '.join(mention_keys)
+#            name = f" MAX {variable} factor {nm}"
+#            z[name] = factor
+#            ins.append(instant)
+#        while len(ins) > 1:
+#            x = ins[0]
+#            y = ins[1]
+#            if len(x.columns.intersection(y.columns)) > 0:
+#                overlapping_labels = x.columns.intersection(y.columns)
+#                overlapping_labels = overlapping_labels.tolist()
+#                a = x.merge(y, on=overlapping_labels, how="inner")
+#                ins.append(a)
+#                ins.pop(1)
+#                ins.pop(0)
+#                continue
+#            if len(x.columns.intersection(y.columns)) == 0:
+#                a = x.join(y)
+#                ins.append(a)
+#                ins.pop(1)
+#                ins.pop(0)
+#                continue
+#        b = 1
+#        while len(z) > 0:
+#            print(z)
+#            a = list(z.values())[0]["factor"]
+#            b *= a.at[0]
+#            z.pop(list(z.keys())[0])
+#        return b,ins
+
+    def MAP(self,query = ["I", "J"], order = ["O", "Y", "X","I", "J"], evidence = pd.Series({"O":True})):
+        self.pruning([], query, evidence.index, evidence.values)
         z = self.bn.get_all_cpts()
+        if query == []:
+            query = order
         ins = []
-        for key, value in evidence.items():
-            for keys, values in z.items():
-                if key in values.columns:
-                    values.drop(values.index[values[keys] != value], inplace=True)
-                    values.reset_index()
         for variable in order:
-            mention = []
             mention_keys = []
+            mention = []
             for key, df in z.items():
                 if variable in df.columns.tolist():
                     mention.append(df)
                     mention_keys.append(key)
-            instant, factor = self.maxing_out(self.multi_factor(mention), variable)
-            instant.pop('factor')
-            for s in mention_keys:
-                z.pop(s)
-            nm = ' '.join(mention_keys)
-            name = f" MAX {variable} factor {nm}"
-            z[name] = factor
-            ins.append(instant)
+            if variable not in query:
+                factor = self.summing_out(self.multi_factor(mention), variable)
+                for s in mention_keys:
+                    z.pop(s)
+                nm = ' '.join(mention_keys)
+                name = f"Sigma {variable} factor {nm}"
+                z[name] = factor
+            if variable in query:
+                instant, factor = self.maxing_out(self.multi_factor(mention), variable)
+                instant.pop('factor')
+                for s in mention_keys:
+                    z.pop(s)
+                nm = ' '.join(mention_keys)
+                name = f" MAX {variable} factor {nm}"
+                z[name] = factor
+                ins.append(instant)
+
         while len(ins) > 1:
             x = ins[0]
             y = ins[1]
@@ -284,10 +338,10 @@ class BNReasoner:
                 ins.pop(1)
                 ins.pop(0)
                 continue
-        b = 1
+        b=1
         while len(z) > 0:
             a = list(z.values())[0]["factor"]
             b *= a.at[0]
             z.pop(list(z.keys())[0])
-        return b,ins
 
+        return b,ins
