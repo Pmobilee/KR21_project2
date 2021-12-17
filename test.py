@@ -2,7 +2,8 @@ from typing import Union
 from BayesNet import BayesNet
 import BNReasoner
 import os
-
+import ordering
+import random
 
 from typing import List, Tuple, Dict
 import networkx as nx
@@ -16,4 +17,4 @@ from copy import deepcopy
 
 cwd = os.getcwd()
 
-test_file = BNReasoner.BNReasoner(net = f'{cwd}/testing/dog_problem.BIFXML')
+t = BNReasoner.BNReasoner(net = f'{cwd}/testing/lecture_example3.BIFXML')

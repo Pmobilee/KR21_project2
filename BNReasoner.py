@@ -2,7 +2,7 @@ from typing import Union
 from BayesNet import BayesNet
 import pandas as pd
 from copy import deepcopy
-
+import random
 
 
 class BNReasoner:
@@ -152,6 +152,20 @@ class BNReasoner:
             count +=1
         return self
 
+    def order(self, heuristic, query):
+        variables = self.bn.get_all_variables()
+        if "p" in variables:
+            self.bn.del_var('p')
+            variables = self.bn.get_all_variables()
+        for item in query:
+            variables.remove(item)
+        if heuristic == "random":
+            random.shuffle(variables)
+            order = variables
+            order.extend(query)
+
+        return order
+
 
     def multi_factor(self, lista):
         while len(lista) > 1:
@@ -193,7 +207,7 @@ class BNReasoner:
         b = b.loc[b.groupby(colss)["factor"].idxmax()].reset_index(drop=True)
         cpt = cpt.groupby(colss)["factor"].agg('max').reset_index()
         if row == len(cpt.index):
-            cpt = cpt[cpt['factor'] == cpt[ 'factor'].max()]
+            cpt = cpt[cpt['factor'] == cpt[ 'factor'].max()].reset_index(drop= True)
             b = deepcopy(cpt)
         return b, cpt
 
@@ -291,10 +305,13 @@ class BNReasoner:
 #            z.pop(list(z.keys())[0])
 #        return b,ins
 
-    def MAP(self,query = ["I", "J"], order = ["O", "Y", "X","I", "J"], evidence = pd.Series({"O":True})):
+    def MAP(self,query = None, evidence = pd.Series({}), heuristic = 'random'):
+        if query is None:
+            query = []
         self.pruning([], query, evidence.index, evidence.values)
         z = self.bn.get_all_cpts()
-        if query == []:
+        order = self.order(heuristic, query)
+        if not query:
             query = order
         ins = []
         for variable in order:
@@ -305,6 +322,7 @@ class BNReasoner:
                     mention.append(df)
                     mention_keys.append(key)
             if variable not in query:
+                print('yes')
                 factor = self.summing_out(self.multi_factor(mention), variable)
                 for s in mention_keys:
                     z.pop(s)
@@ -342,6 +360,8 @@ class BNReasoner:
         while len(z) > 0:
             a = list(z.values())[0]["factor"]
             b *= a.at[0]
+
+
             z.pop(list(z.keys())[0])
 
         return b,ins
