@@ -34,7 +34,7 @@ def get_order(graph, heuristic, query = []):
     interaction_graph = graph.bn.get_interaction_graph()
     original_interaction_graph = graph.bn.get_interaction_graph()
     original_interaction_graph.remove_nodes_from(query)
-
+    
     order = []
 
     # Min-degree heuristic
@@ -62,10 +62,12 @@ def get_order(graph, heuristic, query = []):
                     order.pop(-1)
 
                 
-                for i in range(len(query)):
-                    if query[i] in order:
-                        order.remove(query[i])
+                for z in range(len(query)):
+                    if query[z] in order:
+                        order.remove(query[z])
                 
+                temp_list = list(set(list(original_interaction_graph.nodes)) - set(order))
+                order.extend(temp_list)
                 order.extend(query)
                 return order
 
@@ -261,4 +263,4 @@ def get_order(graph, heuristic, query = []):
 # print(degrees)
 
 # print()
-print(get_order(test_file, 'min_degree', query = ['hear-bark']))
+print(get_order(test_file, 'min_degree', query = ['light-on']))
