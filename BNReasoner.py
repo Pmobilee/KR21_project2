@@ -152,25 +152,23 @@ class BNReasoner:
             count +=1
         return self
 
-    def order(self, heuristic, query):
+    def order(self, query):
         variables = self.bn.get_all_variables()
         if "p" in variables:
             self.bn.del_var('p')
             variables = self.bn.get_all_variables()
         for item in query:
-            print(variables)
-            print(query)
-            print(item)
             variables.remove(item)
-        if heuristic == "random":
-            random.shuffle(variables)
-            order = variables
-            order.extend(query)
-
+        random.shuffle(variables)
+        order = variables
+        order.extend(query)
         return order
 
 
     def multi_factor(self, lista):
+        maybe = deepcopy(lista)
+        if len(lista) == 1:
+            return lista[0]
         while len(lista) > 1:
             x = lista[0]
             y = lista[1]
@@ -186,14 +184,24 @@ class BNReasoner:
             lista.pop(0)
             lista.pop(0)
             lista.append(z)
-        return lista[0]
+
+        a = lista[0]
+        if len(a.index) == 0:
+            print(a)
+        a = a.dropna(subset = ["factor"], inplace=False).reset_index(drop=True)
+        return a
 
     def summing_out(self, cpt, variable):
-        df = cpt.drop(variable, axis = 1)
-        d = df.columns[-1]
-        agg = {d: 'sum'}
-        groups = df.columns.to_list()[:-1]
-        df_new = df.groupby(groups, as_index=False).aggregate(agg).reindex(columns=df.columns)
+        if len(cpt.index) == 1:
+            df_new = cpt.drop(variable, axis = 1)
+            if "p" in df_new.columns:
+                df_new.rename(columns={df_new.columns[-1]: 'factor'}, inplace=True)
+        else:
+            df = cpt.drop(variable, axis = 1)
+            d = df.columns[-1]
+            agg = {d: 'sum'}
+            groups = df.columns.to_list()[:-1]
+            df_new = df.groupby(groups, as_index=False).aggregate(agg).reindex(columns=df.columns)
         return df_new
 
     def maxing_out(self, cpt,variable):
@@ -207,6 +215,7 @@ class BNReasoner:
             colss.remove(variable)
             colssa.remove(variable)
         b = cpt
+        print(b)
         b = b.loc[b.groupby(colss)["factor"].idxmax()].reset_index(drop=True)
         cpt = cpt.groupby(colss)["factor"].agg('max').reset_index()
         if row == len(cpt.index):
@@ -236,14 +245,13 @@ class BNReasoner:
         x.append(variable)
         return x
 
-    def posterior_marginals(self, order: list, evidence):
+    def posterior_marginals(self,query:list, order: list, evidence):
         thing = self.bn.get_all_cpts()
         for key, value in evidence.items():
             for key_1, value_1 in thing.items():
                 if key in value_1.columns:
                     value_1.drop(value_1.index[value_1[key] != value], inplace=True)
                     value_1.reset_index()
-
         for variable in order:
             mention_keys = []
             mention = []
@@ -252,16 +260,32 @@ class BNReasoner:
                 if variable in df.columns.tolist():
                     mention.append(df)
                     mention_keys.append(key)
-
-            factor = self.summing_out(self.multi_factor(mention), variable)
+            if variable not in query:
+                factor = self.summing_out(self.multi_factor(mention), variable)
+            else:
+                factor = self.multi_factor(mention)
             for s in mention_keys:
                 thing.pop(s)
-            sum = factor["factor"].sum()
-            factor["factor"] = factor["factor"].values / sum
             nm = ' '.join(mention_keys)
             name = f"Sigma {variable} factor {nm}"
             thing[name] = factor
+#        ending = []
+#        ending_keys = []
+#        for variable in self.bn.get_all_variables():
+#            if variable in order:
+#                continue
+#            for key, df in thing.items():
+#                if variable in df.columns.tolist():
+#                    ending.append(df)
+#                    ending_keys.append(df.keys())
+#        for key, df in thing.items():
+#            ending.append(df)
+#        print(ending)
+#        end = self.multi_factor(ending)
 
+        sum = factor["factor"].sum()
+        factor["factor"] = factor["factor"].values / sum
+        thing[name] = factor
         return thing
 
 #    def MPE(self,evidence,order):
@@ -314,11 +338,13 @@ class BNReasoner:
         self.pruning([], query, evidence.index, evidence.values)
         print("pruning done")
         z = self.bn.get_all_cpts()
+
         if heuristic == 'random':
-            order = self.order(heuristic, query)
+            order = self.order(query)
         if heuristic == 'min_degree':
             order = self.get_order(heuristic ='min_degree', query = query)
         print("order done")
+
         if not query:
             query = order
         ins = []
@@ -330,7 +356,6 @@ class BNReasoner:
                     mention.append(df)
                     mention_keys.append(key)
             if variable not in query:
-                print('yes')
                 factor = self.summing_out(self.multi_factor(mention), variable)
                 for s in mention_keys:
                     z.pop(s)
@@ -365,11 +390,10 @@ class BNReasoner:
                 ins.pop(0)
                 continue
         b=1
+        print(z)
         while len(z) > 0:
             a = list(z.values())[0]["factor"]
             b *= a.at[0]
-
-
             z.pop(list(z.keys())[0])
 
         return b,ins
