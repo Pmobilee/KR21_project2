@@ -2,7 +2,6 @@ from typing import Union
 from BayesNet import BayesNet
 import BNReasoner
 import os
-import ordering
 import random
 
 from typing import List, Tuple, Dict
@@ -17,4 +16,4 @@ from copy import deepcopy
 
 cwd = os.getcwd()
 
-t = BNReasoner.BNReasoner(net = f'{cwd}/testing/lecture_example3.BIFXML')
+t = BNReasoner.BNReasoner(net = f'{cwd}/testing/lecture_example2.BIFXML')

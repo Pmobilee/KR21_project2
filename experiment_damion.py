@@ -19,7 +19,7 @@ import pickle
 
 cwd = os.getcwd()
 
-NET_SIZES = [5,15,25]
+NET_SIZES = [5]
 ALGORITHMS = ['MAP',"MPE"]
 HEURISTICS = ['min_degree','min_fill', 'random']
 

@@ -342,6 +342,8 @@ class BNReasoner:
             order = self.order(query)
         if heuristic == 'min_degree':
             order = self.get_order(heuristic ='min_degree', query = query)
+        if heuristic == 'min_fill':
+            order = self.get_order(heuristic='min_fill', query=query)
         print("order done")
 
         if not query:
