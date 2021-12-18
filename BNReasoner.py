@@ -158,6 +158,9 @@ class BNReasoner:
             self.bn.del_var('p')
             variables = self.bn.get_all_variables()
         for item in query:
+            print(variables)
+            print(query)
+            print(item)
             variables.remove(item)
         if heuristic == "random":
             random.shuffle(variables)
@@ -309,8 +312,10 @@ class BNReasoner:
         if query is None:
             query = []
         self.pruning([], query, evidence.index, evidence.values)
+        print("pruning done")
         z = self.bn.get_all_cpts()
         order = self.order(heuristic, query)
+        print("order done")
         if not query:
             query = order
         ins = []
