@@ -3,7 +3,8 @@ from BayesNet import BayesNet
 import pandas as pd
 from copy import deepcopy
 import random
-
+import networkx as nx
+import os
 
 class BNReasoner:
     def __init__(self, net: Union[str, BayesNet]):
@@ -403,6 +404,7 @@ class BNReasoner:
                 count += 1
         return count
 
+
     # Function to return the order, takes the graph file and heuristic as input
     def get_order(self, heuristic, query = []):
 
@@ -514,122 +516,138 @@ class BNReasoner:
         # Min_fill heuristic
         elif heuristic == 'min_fill':
             
-            length = len(list(interaction_graph.nodes))
+            length = len(list(original_interaction_graph.nodes))
+            interaction_graph = nx.Graph(original_interaction_graph)
 
             # For the amount of nodes in the interaction graph..
-            for i in range(len(list(interaction_graph.nodes))):
+            for i in range(length):
                 
-                interaction_graph = self.graph.get_interaction_graph()
                 
+                
+
                 # This is ugly but true: this entire function was written for dog_problem, and worked. But the other examples went past the length of the amount of nodes, this is a failsafe
                 # So if this entire loop is run the amount of times that there are nodes, the entire function is stopped, and the last remaining node is added to the order list
-                if i == length - 1:
+                if i == length-1:
 
                     if current_least_edges not in query:
                         order.extend(list(interaction_graph.nodes))
                     if len(order) > len(list(original_interaction_graph.nodes)):
                         order.pop(-1)
+
+                    for t in range(len(query)):
+                        if query[t] not in order:
+                            order.append(query[t])
                     return order
 
                 # Setting our current node with least edges to None, and giving the current least number of edges to an unrealistically high number
+                
+
                 current_least_edges = None
                 current_least_edges_count = 1000
-
-
                 # Set the current node
-                node = list(interaction_graph.nodes)[i]
-                
-
-                # Find its adjacents
-                node_adjacents = interaction_graph.adj[node]
-                node_adjacents_list = list(node_adjacents.keys())
-
-                # Could not think of a better name, this returns the edges that the node has, but in a list with tuples, that we have to extract below
-                node_edges_list = list(interaction_graph.edges(node))
-                node_edges = []
-                
-                # For every item in the previous list, extract the tuple, and get the actual edge node by taking the second value in that tuple, example from a current node 'dog-bark' : ('dog-bark', 'bowel-problem')[1] == 'bowel-problem' <- edge node
-                for g in range(len(node_edges_list)):
-                    node_tuples = node_edges_list[g]
-                    node_edges.append(node_tuples[1])
-                
-            
-
-                # For all adjacents check how many of their edges do not match the root node adjacents (so we can calculate how many new edges we would make if we removed our current node)
-                for j in range(len(node_adjacents_list)):
-
-                    # Pick our first child node that is adjacent to our current node
-                    child_node = node_adjacents_list[j]
-
-                    # Get its edges
-                    child_node_list = list(interaction_graph.edges(child_node))
-                    child_node_edges = []
-
-                    # Now we get all the edges of the child node to compare to our current node, so we can calculate how many new edges we would create later
-                    for g in range(len(child_node_list)):
-                        child_node_tuples = child_node_list[g]
-                        child_node_edges.append(child_node_tuples[1])
-
+                for j in range(len(interaction_graph.nodes)):
                     
-                    # Use the filter_ function to calculate how many new edges would have to be created on this child node
-                    edge_count = self.filter_(node_edges, child_node_edges)
 
-                    # If the amount is less than our current best, the child node becomes the new node with the least amount of edges created if it were deleted
-                    if edge_count < current_least_edges_count:
-                        current_least_edges = child_node
-                        current_least_edges_count = edge_count
+                    # print('nodes:', interaction_graph.nodes, 'i:', j)
+                    node = list(interaction_graph.nodes)[j]
+                    
 
-
-                print('Least edges:', current_least_edges)
+                    # Find its adjacents
+                    node_adjacents = interaction_graph.adj[node]
 
                 
-                # This seems a little strange, but I copied everything below from min_degree, as removing the nodes and adding edges is the exact same
-                # Please disregard the naming scheme, we just set min_degree node to our min_fill node
-                min_degree_node = current_least_edges
-                
-                min_node_adjacents = interaction_graph.adj[min_degree_node]
+                    node_adjacents_list = list(node_adjacents.keys())
+
+                    # Could not think of a better name, this returns the edges that the node has, but in a list with tuples, that we have to extract below
+                    node_edges_list = list(interaction_graph.edges(node))
+                    node_edges = []
+                    
+                    # For every item in the previous list, extract the tuple, and get the actual edge node by taking the second value in that tuple, example from a current node 'dog-bark' : ('dog-bark', 'bowel-problem')[1] == 'bowel-problem' <- edge node
+                    for g in range(len(node_edges_list)):
+                        node_tuples = node_edges_list[g]
+                        node_edges.append(node_tuples[1])
+                    
 
 
-                adjacents = list(min_node_adjacents.keys())
-                
+                    # For all adjacents check how many of their edges do not match the root node adjacents (so we can calculate how many new edges we would make if we removed our current node)
+                    for z in range(len(node_adjacents_list)):
 
-                # if the minimum node has more than 1 adjacent nodes
-                if len(min_node_adjacents.keys()) > 1:
+                        # Pick our first child node that is adjacent to our current node
+                        child_node = node_adjacents_list[z]
 
-                    # store the adjecent nodes in temp list, so not to actually alter the list with adjacent nodes
-                    temp_adjacents = adjacents
+                        # Get its edges
+                        child_node_list = list(interaction_graph.edges(child_node))
+                        child_node_edges = []
 
-                    # Then for every adjacent node
-                    for i in range(len(min_node_adjacents.keys())):
-
-                        # store the current adjacent node and remove it from the list (so it does not create an edge with itself, which returns a cyclic error)
-                        current_adjacent = temp_adjacents[i]
+                        # Now we get all the edges of the child node to compare to our current node, so we can calculate how many new edges we would create later
+                        for g in range(len(child_node_list)):
+                            child_node_tuples = child_node_list[g]
+                            child_node_edges.append(child_node_tuples[1])
+                            
                         
-                        # for every adjacent node that does not equal the adjacent node we're currently trying to add an edge to...
-                        for j in range(len(temp_adjacents)):
+                        # Use the filter_ function to calculate how many new edges would have to be created on this child node
+                        edge_count = self.filter_(node_edges, child_node_edges) +1
 
-                            if temp_adjacents[i] == current_adjacent:
-                                continue
+                        # If the amount is less than our current best, the child node becomes the new node with the least amount of edges created if it were deleted
+                        if edge_count < current_least_edges_count:
+                            # print('node:', node, 'has edges:', edge_count)
+                            current_least_edges = node
+                            current_least_edges_count = edge_count
+                            # print('-------------current least edges count = ', current_least_edges_count)
 
-                            # Add the edge between these two adjacent nodes
-                            else:
-                                self.graph.add_edge(current_adjacent, temp_adjacents[j])
+                if current_least_edges == None:
+                    # print('NOTHING')
+                    current_least_edges = list(interaction_graph.nodes)[0]
+
                     
-                    # After the edges are added, we can safely delete the node and store it as our (next) node in the order list
-                    print(f'deleting node: {min_degree_node}, left: {interaction_graph.nodes}')
-                    self.graph.del_var(min_degree_node)
-                    order.append(str(min_degree_node))
-                
-                # If there is there is just one adjacent node, it could mean that we've reached the final node, so we add that last node to our order list and return it, stopping the function
-                else:
-                    if len(list(interaction_graph.nodes)) == 1:
-                        order.extend(list(interaction_graph.nodes))
-                        return order
+                    # This seems a little strange, but I copied everything below from min_degree, as removing the nodes and adding edges is the exact same
+                    # Please disregard the naming scheme, we just set min_degree node to our min_fill node
+                    min_degree_node = current_least_edges
+                    
+                    min_node_adjacents = interaction_graph.adj[min_degree_node]
 
-                    # However, in all other cases it just means no edges need to be added as there is only one adjacent node  
-                    else:
+
+                    adjacents = list(min_node_adjacents.keys())
+                    
+
+                    # if the minimum node has more than 1 adjacent nodes
+                    if len(min_node_adjacents.keys()) > 1:
+
+                        # store the adjecent nodes in temp list, so not to actually alter the list with adjacent nodes
+                        temp_adjacents = adjacents
+
+                        # Then for every adjacent node
+                        for i in range(len(min_node_adjacents.keys())):
+
+                            # store the current adjacent node and remove it from the list (so it does not create an edge with itself, which returns a cyclic error)
+                            current_adjacent = temp_adjacents[i]
+                            
+                            # for every adjacent node that does not equal the adjacent node we're currently trying to add an edge to...
+                            for j in range(len(temp_adjacents)):
+
+                                if temp_adjacents[i] == current_adjacent:
+                                    continue
+
+                                # Add the edge between these two adjacent nodes
+                                else:
+                                    self.graph.add_edge(current_adjacent, temp_adjacents[j])
+                        
+                        # After the edges are added, we can safely delete the node and store it as our (next) node in the order list
+                        print(f'deleting node: {min_degree_node}, left: {interaction_graph.nodes}')
                         self.graph.del_var(min_degree_node)
                         order.append(str(min_degree_node))
+                    
+                    # If there is there is just one adjacent node, it could mean that we've reached the final node, so we add that last node to our order list and return it, stopping the function
+                    else:
+                        if len(list(interaction_graph.nodes)) == 1:
+                            order.extend(list(interaction_graph.nodes))
+                            return order
+
+                        # However, in all other cases it just means no edges need to be added as there is only one adjacent node  
+                        else:
+                            self.graph.del_var(min_degree_node)
+                            order.append(str(min_degree_node))
 
         else:
             print(f'Given heuristic \'{heuristic}\' does not match min-degree or min-fill, exiting..')
+
