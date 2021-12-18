@@ -16,8 +16,7 @@ from copy import deepcopy
 
 # For local testing 
 cwd = os.getcwd()
-# test_file = BNReasoner.BNReasoner(net = f'{cwd}/testing/dog_problem.BIFXML')
-test_file  = BNReasoner.BNReasoner(net = nx.read_gpickle(f"{cwd}/net25/net25_2.gpickle"))
+test_file = BNReasoner.BNReasoner(net = f'{cwd}/testing/dog_problem.BIFXML')
 
 # Function to compare edges between nodes, always returns at least 1 since two connected nodes share an edge to each other
 def filter_(x, y):
@@ -35,7 +34,7 @@ def get_order(graph, heuristic, query = []):
     interaction_graph = graph.bn.get_interaction_graph()
     original_interaction_graph = graph.bn.get_interaction_graph()
     original_interaction_graph.remove_nodes_from(query)
-    
+
     order = []
 
     # Min-degree heuristic
@@ -63,12 +62,10 @@ def get_order(graph, heuristic, query = []):
                     order.pop(-1)
 
                 
-                for z in range(len(query)):
-                    if query[z] in order:
-                        order.remove(query[z])
+                for i in range(len(query)):
+                    if query[i] in order:
+                        order.remove(query[i])
                 
-                temp_list = list(set(list(original_interaction_graph.nodes)) - set(order))
-                order.extend(temp_list)
                 order.extend(query)
                 return order
 
@@ -264,8 +261,4 @@ def get_order(graph, heuristic, query = []):
 # print(degrees)
 
 # print()
-
-
-test_file  = BNReasoner.BNReasoner(net = nx.read_gpickle(f"{cwd}/net15/net15_2.gpickle"))
-print(test_file.bn.get_all_variables())
-print(get_order(test_file, 'min_degree', query = [])) 
+print(get_order(test_file, 'min_degree', query = ['hear-bark']))
