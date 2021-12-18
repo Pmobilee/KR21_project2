@@ -21,7 +21,7 @@ cwd = os.getcwd()
 
 NET_SIZES = [5,15,25]
 ALGORITHMS = ['MAP',"MPE"]
-HEURISTICS = ['min_degree', 'random']
+HEURISTICS = ['min_degree','min_fill', 'random']
 
 
 def create_query_evidence(variables, algorithm):
@@ -48,8 +48,9 @@ for algorithm in range(len(ALGORITHMS)):
     print('Running', current_algorithm)
     size_runtime_dict = {}
     size_list = []
-    runtimes_degree = []
+    runtime_degree = []
     runtime_random = []
+    runtime_fill = []
 
     for i in range(len(NET_SIZES)):
         size = NET_SIZES[i]
@@ -73,11 +74,13 @@ for algorithm in range(len(ALGORITHMS)):
                 if HEURISTICS[heuristic] == 'random':
                     runtime_random.append(end_time)
                 if HEURISTICS[heuristic] == 'min_degree':
-                    runtimes_degree.append(end_time)
+                    runtime_degree.append(end_time)
+                if HEURISTICS[heuristic] == 'min_fill':
+                    runtime_fill.append(end_time)
 
 
     data_end = pd.DataFrame(
-        {'size': size_list, "runtime_degree": runtimes_degree, "runtime_random":runtime_random})
+        {'size': size_list, "runtime_degree": runtime_degree, "runtime_random":runtime_random, "runtime_fill": runtime_fill})
     data_end.to_csv(f'{current_algorithm}.csv')
 
 
