@@ -19,8 +19,8 @@ import pickle
 
 cwd = os.getcwd()
 
-NET_SIZES = [5, 15, 25]
-ALGORITHMS = ['MPE','MAP']
+NET_SIZES = [5,15,25]
+ALGORITHMS = ['MAP',"MPE"]
 HEURISTICS = ['min_degree', 'random']
 
 
@@ -48,7 +48,9 @@ for algorithm in range(len(ALGORITHMS)):
     print('Running', current_algorithm)
     size_runtime_dict = {}
     size_list = []
-    runtimes = []
+    runtimes_degree = []
+    runtime_random = []
+
     for i in range(len(NET_SIZES)):
         size = NET_SIZES[i]
         directory = f'{cwd}/net{size}'
@@ -60,20 +62,22 @@ for algorithm in range(len(ALGORITHMS)):
                 g.bn.del_var('p')
                 variables = g.bn.get_all_variables()
             queries, evidence = create_query_evidence(variables, current_algorithm)
-
+            size_list.append(size)
             for heuristic in range(len(HEURISTICS)):
                 current_heuristic = HEURISTICS[heuristic]
                 print('Running', current_heuristic, 'on', current_algorithm)
                 start_time = time.time()
                 g.MAP(queries,evidence,heuristic = current_heuristic)
                 end_time = time.time() - start_time
-                runtimes.append(end_time)
-                size_list.append(size)
-                
 
-        data_end = pd.DataFrame(
-            {'size': size_list, "runtime": runtimes})
-        data_end.to_csv(f'{current_algorithm}_{current_heuristic}.csv')
+                if HEURISTICS[heuristic] == 'random':
+                    runtime_random.append(end_time)
+                if HEURISTICS[heuristic] == 'min_degree':
+                    runtimes_degree.append(end_time)
 
+
+    data_end = pd.DataFrame(
+        {'size': size_list, "runtime_degree": runtimes_degree, "runtime_random":runtime_random})
+    data_end.to_csv(f'{current_algorithm}.csv')
 
 
