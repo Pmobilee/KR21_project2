@@ -3,7 +3,6 @@ from typing_extensions import runtime
 from BayesNet import BayesNet
 import BNReasoner
 import os
-import ordering
 import random
 import time
 from typing import List, Tuple, Dict
@@ -21,7 +20,7 @@ cwd = os.getcwd()
 
 NET_SIZES = [15]
 ALGORITHMS = ['MAP',"MPE"]
-HEURISTICS = ['min_fill']
+HEURISTICS = ['min_fill','random','min_degree']
 
 
 def create_query_evidence(variables, algorithm):
