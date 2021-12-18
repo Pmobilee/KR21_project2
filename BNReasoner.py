@@ -196,10 +196,15 @@ class BNReasoner:
             if "p" in df_new.columns:
                 df_new.rename(columns={df_new.columns[-1]: 'factor'}, inplace=True)
         else:
+
             df = cpt.drop(variable, axis = 1)
             d = df.columns[-1]
             agg = {d: 'sum'}
             groups = df.columns.to_list()[:-1]
+            if len(groups) == 0:
+                print(cpt)
+                cpt.rename(columns={cpt.columns[-1]: "factor"}, inplace=True)
+                return cpt
             df_new = df.groupby(groups, as_index=False).aggregate(agg).reindex(columns=df.columns)
         return df_new
 
