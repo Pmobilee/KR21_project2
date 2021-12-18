@@ -404,7 +404,7 @@ class BNReasoner:
         return b,ins
     
 
-    def filter_(x, y):
+    def filter_(self, x, y):
         count = 0
         for edge in x:
             if edge not in y:
