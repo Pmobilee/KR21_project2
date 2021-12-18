@@ -20,8 +20,8 @@ import pickle
 cwd = os.getcwd()
 
 NET_SIZES = [5, 15, 25]
-ALGORITHMS = ['MPE']
-HEURISTICS = ['min_degree']
+ALGORITHMS = ['MPE','MAP']
+HEURISTICS = ['min_degree', 'random']
 
 
 def create_query_evidence(variables, algorithm):
@@ -46,32 +46,24 @@ def create_query_evidence(variables, algorithm):
 for algorithm in range(len(ALGORITHMS)):
     current_algorithm = ALGORITHMS[algorithm]
     print('Running', current_algorithm)
-
-    for heuristic in range(len(HEURISTICS)):
-        current_heuristic = HEURISTICS[heuristic]
-        print('Running', current_heuristic, 'on', current_algorithm)
-
-        size_runtime_dict = {}
-        size_list = []
-        runtimes = []
-        for i in range(len(NET_SIZES)):
-            size = NET_SIZES[i]
-            directory = f'{cwd}/net{size}'
-
-
-
-            for filename in os.listdir(directory):
-                GRAPH = nx.read_gpickle(f'{directory}/{filename}')
-                g = BNReasoner.BNReasoner(net=GRAPH)
-
-
+    size_runtime_dict = {}
+    size_list = []
+    runtimes = []
+    for i in range(len(NET_SIZES)):
+        size = NET_SIZES[i]
+        directory = f'{cwd}/net{size}'
+        for filename in os.listdir(directory):
+            GRAPH = nx.read_gpickle(f'{directory}/{filename}')
+            g = BNReasoner.BNReasoner(net=GRAPH)
+            variables = g.bn.get_all_variables()
+            if "p" in variables:
+                g.bn.del_var('p')
                 variables = g.bn.get_all_variables()
-                if "p" in variables:
-                    g.bn.del_var('p')
-                    variables = g.bn.get_all_variables()
-                queries, evidence = create_query_evidence(variables, current_algorithm)
-                
+            queries, evidence = create_query_evidence(variables, current_algorithm)
 
+            for heuristic in range(len(HEURISTICS)):
+                current_heuristic = HEURISTICS[heuristic]
+                print('Running', current_heuristic, 'on', current_algorithm)
                 start_time = time.time()
                 g.MAP(queries,evidence,heuristic = current_heuristic)
                 end_time = time.time() - start_time

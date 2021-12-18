@@ -186,8 +186,6 @@ class BNReasoner:
             lista.append(z)
 
         a = lista[0]
-        if len(a.index) == 0:
-            print(a)
         a = a.dropna(subset = ["factor"], inplace=False).reset_index(drop=True)
         return a
 
@@ -215,10 +213,10 @@ class BNReasoner:
             colss.remove(variable)
             colssa.remove(variable)
         b = cpt
-        print(b)
+
         b = b.loc[b.groupby(colss)["factor"].idxmax()].reset_index(drop=True)
         cpt = cpt.groupby(colss)["factor"].agg('max').reset_index()
-        if row == len(cpt.index):
+        if row == len(cpt.index) == 1:
             cpt = cpt[cpt['factor'] == cpt[ 'factor'].max()].reset_index(drop= True)
             b = deepcopy(cpt)
         return b, cpt
@@ -390,7 +388,6 @@ class BNReasoner:
                 ins.pop(0)
                 continue
         b=1
-        print(z)
         while len(z) > 0:
             a = list(z.values())[0]["factor"]
             b *= a.at[0]
