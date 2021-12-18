@@ -39,9 +39,6 @@ def create_query_evidence(variables):
 
 
 
-all_runtimes = []
-
-
 
 for algorithm in range(len(ALGORITHMS)):
     current_algorithm = ALGORITHMS[algorithm]
@@ -72,7 +69,7 @@ for algorithm in range(len(ALGORITHMS)):
                 
                 if current_algorithm == 'MAP':
                     start_time = time.time()
-                    g.MAP(queries,evidence,heuristic)
+                    g.MAP(queries,evidence,heuristic = current_heuristic)
                     end_time = time.time() - start_time
                 else:
                     pass

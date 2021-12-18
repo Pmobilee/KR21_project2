@@ -314,7 +314,10 @@ class BNReasoner:
         self.pruning([], query, evidence.index, evidence.values)
         print("pruning done")
         z = self.bn.get_all_cpts()
-        order = self.order(heuristic, query)
+        if heuristic == 'random':
+            order = self.order(heuristic, query)
+        if heuristic == 'min_degree':
+            order = self.get_order(heuristic ='min_degree', query = query)
         print("order done")
         if not query:
             query = order
