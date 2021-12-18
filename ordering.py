@@ -16,7 +16,8 @@ from copy import deepcopy
 
 # For local testing 
 cwd = os.getcwd()
-test_file = BNReasoner.BNReasoner(net = f'{cwd}/testing/dog_problem.BIFXML')
+# test_file = BNReasoner.BNReasoner(net = f'{cwd}/testing/dog_problem.BIFXML')
+test_file  = BNReasoner.BNReasoner(net = nx.read_gpickle(f"{cwd}/net25/net25_2.gpickle"))
 
 # Function to compare edges between nodes, always returns at least 1 since two connected nodes share an edge to each other
 def filter_(x, y):
@@ -263,4 +264,8 @@ def get_order(graph, heuristic, query = []):
 # print(degrees)
 
 # print()
-print(get_order(test_file, 'min_degree', query = ['light-on']))
+
+
+test_file  = BNReasoner.BNReasoner(net = nx.read_gpickle(f"{cwd}/net15/net15_2.gpickle"))
+print(test_file.bn.get_all_variables())
+print(get_order(test_file, 'min_degree', query = [])) 
