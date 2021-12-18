@@ -375,12 +375,12 @@ class BNReasoner:
         return count
 
     # Function to return the order, takes the graph file and heuristic as input
-    def get_order(self, net, heuristic, query = []):
+    def get_order(self, heuristic, query = []):
 
         # Gets the interaction graph and stores the original version for later comparison
-        self.graph = net
-        interaction_graph = self.graph.bn.get_interaction_graph()
-        original_interaction_graph = self.graph.bn.get_interaction_graph()
+        self.graph = self.bn
+        interaction_graph = self.graph.get_interaction_graph()
+        original_interaction_graph = self.graph.get_interaction_graph()
         original_interaction_graph.remove_nodes_from(query)
         
         order = []
@@ -490,7 +490,7 @@ class BNReasoner:
             # For the amount of nodes in the interaction graph..
             for i in range(len(list(interaction_graph.nodes))):
                 
-                interaction_graph = self.graph.bn.get_interaction_graph()
+                interaction_graph = self.graph.get_interaction_graph()
                 
                 # This is ugly but true: this entire function was written for dog_problem, and worked. But the other examples went past the length of the amount of nodes, this is a failsafe
                 # So if this entire loop is run the amount of times that there are nodes, the entire function is stopped, and the last remaining node is added to the order list
@@ -588,7 +588,7 @@ class BNReasoner:
                     
                     # After the edges are added, we can safely delete the node and store it as our (next) node in the order list
                     print(f'deleting node: {min_degree_node}, left: {interaction_graph.nodes}')
-                    self.graph.bn.del_var(min_degree_node)
+                    self.graph.del_var(min_degree_node)
                     order.append(str(min_degree_node))
                 
                 # If there is there is just one adjacent node, it could mean that we've reached the final node, so we add that last node to our order list and return it, stopping the function
@@ -599,7 +599,7 @@ class BNReasoner:
 
                     # However, in all other cases it just means no edges need to be added as there is only one adjacent node  
                     else:
-                        self.graph.bn.del_var(min_degree_node)
+                        self.graph.del_var(min_degree_node)
                         order.append(str(min_degree_node))
 
         else:
