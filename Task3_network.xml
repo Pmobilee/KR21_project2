@@ -1,0 +1,159 @@
+<!DOCTYPE BIF [
+	<!ELEMENT BIF ( NETWORK )*>
+	      <!ATTLIST BIF VERSION CDATA #REQUIRED>
+	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>
+	<!ELEMENT NAME (#PCDATA)>
+	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >
+	      <!ATTLIST VARIABLE TYPE (nature|decision|utility) "nature">
+	<!ELEMENT OUTCOME (#PCDATA)>
+	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >
+	<!ELEMENT FOR (#PCDATA)>
+	<!ELEMENT GIVEN (#PCDATA)>
+	<!ELEMENT TABLE (#PCDATA)>
+	<!ELEMENT PROPERTY (#PCDATA)>
+]>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Task3</NAME>
+
+
+<!-- Variables -->
+<DEFINITION>
+	<FOR>dog-out</FOR>
+	<GIVEN>bowel-problem</GIVEN>
+	<GIVEN>family-out</GIVEN>
+	<TABLE>0.99 0.01 0.97 0.03 0.9 0.1 0.3 0.7 </TABLE>
+</DEFINITION>
+
+<VARIABLE TYPE="nature">
+	<NAME>Smoking</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Obesity</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Allergy</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Bronchitis</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Lung_cancer</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Heart_condition</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Wheezing</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Fatigue</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Coughing</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Shortness_of_breath</NAME>
+	<OUTCOME>true</OUTCOME>
+	<OUTCOME>false</OUTCOME>
+	<PROPERTY>position = (73, 165)</PROPERTY>
+</VARIABLE>
+
+<!-- Probabilities -->
+<DEFINITION>
+	<FOR>Smoking</FOR>
+	<TABLE>0.35 0.65</TABLE>
+</DEFINITION>
+
+<DEFINITION>
+	<FOR>Obesity</FOR>
+	<TABLE>0.13 0.87</TABLE>
+</DEFINITION>
+
+<DEFINITION>
+	<FOR>Bronchitis</FOR>
+	<GIVEN>Allergy</GIVEN>
+	<GIVEN>Smoking</GIVEN>
+	<TABLE>0.95 0.05 0.30 0.70 0.30 0.70 0.05 0.95 </TABLE>
+</DEFINITION>
+
+<DEFINITION>
+	<FOR>Lung_cancer</FOR>
+	<GIVEN>Smoking</GIVEN>
+	<GIVEN>Obesity</GIVEN>
+	<TABLE>0.99 0.01 0.35 0.65 0.20 0.80 0.01 0.99 </TABLE>
+</DEFINITION>
+
+<DEFINITION>
+	<FOR>Heart_condition</FOR>
+	<GIVEN>Smoking</GIVEN>
+	<GIVEN>Obesity</GIVEN>
+	<TABLE>0.85 0.15 0.25 0.75 0.40 0.60 0.10 0.90 </TABLE>
+</DEFINITION>
+
+<DEFINITION>
+	<FOR>Wheezing</FOR>
+	<GIVEN>Allergy</GIVEN>
+	<GIVEN>Lung_cancer</GIVEN>
+	<TABLE>0.85 0.15 0.25 0.75 0.40 0.60 0.10 0.90 </TABLE>
+</DEFINITION>
+
+<DEFINITION>
+	<FOR>Fatigue</FOR>
+	<GIVEN>Bronchitis</GIVEN>
+	<GIVEN>Obesity</GIVEN>
+	<TABLE>0.70 0.30 0.20 0.80 0.20 0.80 0.10 0.90 </TABLE>
+</DEFINITION>
+
+<DEFINITION>
+	<FOR>Coughing</FOR>
+	<GIVEN>Bronchitis</GIVEN>
+	<GIVEN>Lung_cancer</GIVEN>
+	<TABLE>0.99 0.01 0.40 0.60 0.30 0.70 0.05 0.95 </TABLE>
+</DEFINITION>
+
+<DEFINITION>
+	<FOR>Short_breath</FOR>
+	<GIVEN>Lung_cancer</GIVEN>
+	<GIVEN>Heart_condition</GIVEN>
+	<TABLE>0.90 0.10 0.45 0.55 0.40 0.60 0.01 0.99 </TABLE>
+</DEFINITION>
+
+
