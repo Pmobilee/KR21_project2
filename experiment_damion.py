@@ -14,11 +14,13 @@ import itertools
 import pandas as pd
 from copy import deepcopy
 import pickle
+import gc
+
 
 
 cwd = os.getcwd()
 
-NET_SIZES = [15]
+NET_SIZES = [25]
 ALGORITHMS = ['MAP',"MPE"]
 HEURISTICS = ['min_fill','random','min_degree']
 
@@ -54,7 +56,10 @@ for algorithm in range(len(ALGORITHMS)):
     for i in range(len(NET_SIZES)):
         size = NET_SIZES[i]
         directory = f'{cwd}/net{size}'
+        count = 1
         for filename in os.listdir(directory):
+            print('---------', count,filename)
+            count+=1
             GRAPH = nx.read_gpickle(f'{directory}/{filename}')
             g = BNReasoner.BNReasoner(net=GRAPH)
             variables = g.bn.get_all_variables()
@@ -76,6 +81,7 @@ for algorithm in range(len(ALGORITHMS)):
                     runtime_degree.append(end_time)
                 if HEURISTICS[heuristic] == 'min_fill':
                     runtime_fill.append(end_time)
+                gc.collect()
 
 
     data_end = pd.DataFrame(

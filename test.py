@@ -16,4 +16,14 @@ from copy import deepcopy
 
 cwd = os.getcwd()
 
-t = BNReasoner.BNReasoner(net = f'{cwd}/testing/lecture_example2.BIFXML')
+
+
+for x in range(100):
+    filenames = f'{cwd}/net25/net25_{x}gpickle'
+    GRAPH = nx.read_gpickle(filenames)
+    t = BNReasoner.BNReasoner(net=GRAPH)
+    print(len(t.bn.get_all_variables()))
+
+GRAPH = nx.read_gpickle(f'{cwd}/net25/net25_74gpickle')
+t = BNReasoner.BNReasoner(net=GRAPH)
+print(len(t.bn.get_all_variables()))

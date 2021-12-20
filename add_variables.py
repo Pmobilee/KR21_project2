@@ -6,6 +6,17 @@ Created on Wed Dec 15 20:12:12 2021
 """
 import random
 import pandas as pd
+from BayesNet import BayesNet
+from typing import Union
+from BayesNet import BayesNet
+import pandas as pd
+from copy import deepcopy
+import random
+import networkx as nx
+import os
+import BNReasoner
+import gc
+
 
 def create_variable(net, name):
     
@@ -67,15 +78,19 @@ def add_several_variables(net, names, nr):
             net.add_edge(j)
     return net
 
-for i in range(100):
+for i in range(0, 100):
     net=BayesNet()
     net.load_from_bifxml('testing/dog_problem.BIFXML')
     net1=net
-    names=['a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m','q','w','e','r']
-    net2=add_several_variables(net1, names, 10)
-    
-    path = 'C:/Users/Pablo/Desktop/Pablo/master ai/knowledge representation/project2/KR21_project2-main/net25'
-    nx.write_gpickle(net2,path+'/net25_'+ str(i) +'gpickle')
+    names=['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'zz', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z']
+    try:
+        net2=add_several_variables(net1, names, 20)
+    except:
+        continue
+
+    path = 'D:/OneDrive/VU/knowledge_representation/PGM/KR21_project2/net25'
+    nx.write_gpickle(net2,path+'/net25_'+ str(i) +'.gpickle')
     del net, net1, net2
+    gc.collect()
 
                 
