@@ -202,7 +202,6 @@ class BNReasoner:
             agg = {d: 'sum'}
             groups = df.columns.to_list()[:-1]
             if len(groups) == 0:
-                print(cpt)
                 cpt.rename(columns={cpt.columns[-1]: "factor"}, inplace=True)
                 return cpt
             df_new = df.groupby(groups, as_index=False).aggregate(agg).reindex(columns=df.columns)
@@ -210,6 +209,7 @@ class BNReasoner:
 
     def maxing_out(self, cpt,variable):
         row = len(cpt.index)
+        before = deepcopy(cpt)
         if 'p' in list(cpt.columns):
             cpt.rename(columns={"p": "factor"}, inplace=True)
         colssa = list(cpt.columns)
@@ -219,11 +219,14 @@ class BNReasoner:
             colss.remove(variable)
             colssa.remove(variable)
         b = cpt
-
         b = b.loc[b.groupby(colss)["factor"].idxmax()].reset_index(drop=True)
+
         cpt = cpt.groupby(colss)["factor"].agg('max').reset_index()
         if row == len(cpt.index) == 1:
             cpt = cpt[cpt['factor'] == cpt[ 'factor'].max()].reset_index(drop= True)
+            b = deepcopy(cpt)
+        if len(before.columns) == 2 == len(cpt.columns) and row == len(cpt.index):
+            cpt = cpt[cpt['factor'] == cpt['factor'].max()]
             b = deepcopy(cpt)
         return b, cpt
 
@@ -377,7 +380,6 @@ class BNReasoner:
                 name = f" MAX {variable} factor {nm}"
                 z[name] = factor
                 ins.append(instant)
-
         while len(ins) > 1:
             x = ins[0]
             y = ins[1]
@@ -400,7 +402,6 @@ class BNReasoner:
             a = list(z.values())[0]["factor"]
             b *= a.at[0]
             z.pop(list(z.keys())[0])
-
         return b,ins
     
 
