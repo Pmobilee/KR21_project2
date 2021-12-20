@@ -226,7 +226,7 @@ class BNReasoner:
             cpt = cpt[cpt['factor'] == cpt[ 'factor'].max()].reset_index(drop= True)
             b = deepcopy(cpt)
         if len(before.columns) == 2 == len(cpt.columns) and row == len(cpt.index):
-            cpt = cpt[cpt['factor'] == cpt['factor'].max()]
+            cpt = cpt[cpt['factor'] == cpt['factor'].max()].reset_index(drop= True)
             b = deepcopy(cpt)
         return b, cpt
 
