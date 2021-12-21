@@ -19,12 +19,6 @@
 
 
 <!-- Variables -->
-<DEFINITION>
-	<FOR>dog-out</FOR>
-	<GIVEN>bowel-problem</GIVEN>
-	<GIVEN>family-out</GIVEN>
-	<TABLE>0.99 0.01 0.97 0.03 0.9 0.1 0.3 0.7 </TABLE>
-</DEFINITION>
 
 <VARIABLE TYPE="nature">
 	<NAME>Smoking</NAME>
@@ -98,6 +92,12 @@
 
 <!-- Probabilities -->
 <DEFINITION>
+	<FOR>Allergy</FOR>
+	<TABLE>0.30 0.70</TABLE>
+</DEFINITION>
+
+
+<DEFINITION>
 	<FOR>Smoking</FOR>
 	<TABLE>0.35 0.65</TABLE>
 </DEFINITION>
@@ -150,13 +150,13 @@
 </DEFINITION>
 
 <DEFINITION>
-	<FOR>Short_breath</FOR>
+	<FOR>Shortness_of_breath</FOR>
 	<GIVEN>Lung_cancer</GIVEN>
 	<GIVEN>Heart_condition</GIVEN>
 	<TABLE>0.90 0.10 0.45 0.55 0.40 0.60 0.01 0.99 </TABLE>
 </DEFINITION>
 
-
 </NETWORK>
 </BIF>
+
 
