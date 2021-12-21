@@ -5,6 +5,7 @@ from copy import deepcopy
 import random
 import networkx as nx
 import os
+import sys
 
 class BNReasoner:
     def __init__(self, net: Union[str, BayesNet]):
@@ -230,35 +231,30 @@ class BNReasoner:
             b = deepcopy(cpt)
         return b, cpt
 
-    def prior_marginals(self, order:list):
-        all = self.bn.get_all_cpts()
-        x = list(all.values())
-        for variable in order:
-            mention = []
-            for cpt in x:
-                if variable in cpt.columns.tolist():
-                    mention.append(cpt)
-            factor = self.summing_out(self.multi_factor(mention),variable)
-            y = []
-            for cpt in x:
-                if variable not in cpt.columns.tolist():
-                    y.append(cpt)
-            y.append(factor)
-            x = y
-        return x
-
-    def get_variables_from_order(self, variable):
-        x = self.bn.get_children(variable)
-        x.append(variable)
-        return x
-
-    def posterior_marginals(self,query:list, order: list, evidence):
+    def marginals(self,query =None, heuristic= None, evidence = None):
+        if query is None:
+            query = []
+        if evidence is None:
+            evidence = pd.Series({})
+        if heuristic is None or []:
+            heuristic = 'min_fill'
+        elif not isinstance(query, list):
+            print("Please provide Query in a list as first parameter")
+            sys.exit()
+        if heuristic not in ['min_fill', 'random', "min_degree"]:
+            print("Please provide a heuristic as second parameter, options are 'min_fill', 'min_degree', 'random'")
+            sys.exit()
+        if not isinstance(evidence,pd.Series):
+            print('Please provide as a third parameter evidence as [] or pd.Series({"Variable1":"BooleanValue", "Variable2":"BooleanValue", etc.})')
+            sys.exit()
+        self.pruning([], query, evidence.index, evidence.values)
         thing = self.bn.get_all_cpts()
-        for key, value in evidence.items():
-            for key_1, value_1 in thing.items():
-                if key in value_1.columns:
-                    value_1.drop(value_1.index[value_1[key] != value], inplace=True)
-                    value_1.reset_index()
+        if heuristic == 'random':
+            order = self.order(query)
+        if heuristic == 'min_degree':
+            order = self.get_order(heuristic ='min_degree', query = query)
+        if heuristic == 'min_fill':
+            order = self.get_order(heuristic='min_fill', query=query)
         for variable in order:
             mention_keys = []
             mention = []
@@ -276,68 +272,13 @@ class BNReasoner:
             nm = ' '.join(mention_keys)
             name = f"Sigma {variable} factor {nm}"
             thing[name] = factor
-#        ending = []
-#        ending_keys = []
-#        for variable in self.bn.get_all_variables():
-#            if variable in order:
-#                continue
-#            for key, df in thing.items():
-#                if variable in df.columns.tolist():
-#                    ending.append(df)
-#                    ending_keys.append(df.keys())
-#        for key, df in thing.items():
-#            ending.append(df)
-#        print(ending)
-#        end = self.multi_factor(ending)
-
+        if factor.columns[-1] == 'p':
+            factor.rename(columns={"p": "factor"}, inplace=True)
         sum = factor["factor"].sum()
         factor["factor"] = factor["factor"].values / sum
         thing[name] = factor
-        return thing
+        return thing[name]
 
-#    def MPE(self,evidence,order):
-#        self.pruning([],[],evidence.index,evidence.values)
-#        z = self.bn.get_all_cpts()
-#        ins = []
-#        for variable in order:
-#            mention = []
-#            mention_keys = []
-#            for key, df in z.items():
-#                if variable in df.columns.tolist():
-#                    mention.append(df)
-#                    mention_keys.append(key)
-#            instant, factor = self.maxing_out(self.multi_factor(mention), variable)
-#            instant.pop('factor')
-#            for s in mention_keys:
-#                z.pop(s)
-#            nm = ' '.join(mention_keys)
-#            name = f" MAX {variable} factor {nm}"
-#            z[name] = factor
-#            ins.append(instant)
-#        while len(ins) > 1:
-#            x = ins[0]
-#            y = ins[1]
-#            if len(x.columns.intersection(y.columns)) > 0:
-#                overlapping_labels = x.columns.intersection(y.columns)
-#                overlapping_labels = overlapping_labels.tolist()
-#                a = x.merge(y, on=overlapping_labels, how="inner")
-#                ins.append(a)
-#                ins.pop(1)
-#                ins.pop(0)
-#                continue
-#            if len(x.columns.intersection(y.columns)) == 0:
-#                a = x.join(y)
-#                ins.append(a)
-#                ins.pop(1)
-#                ins.pop(0)
-#                continue
-#        b = 1
-#        while len(z) > 0:
-#            print(z)
-#            a = list(z.values())[0]["factor"]
-#            b *= a.at[0]
-#            z.pop(list(z.keys())[0])
-#        return b,ins
 
     def MAP(self,query = None, evidence = pd.Series({}), heuristic = 'random'):
         if query is None:
