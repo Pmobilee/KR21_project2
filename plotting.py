@@ -137,31 +137,31 @@ print('---for NET 5')
 
 
 # Significance distributed:
-stat, p = stats.ttest_ind(MAP_5_min_degree, MAP_5_min_fill)
+stat, p = stats.mannwhitneyu(MAP_5_min_degree, MAP_5_min_fill)
 print('Significance min_degree & min_fill:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MAP_5_min_degree, MAP_5_random)
+stat, p = stats.mannwhitneyu(MAP_5_min_degree, MAP_5_random, alternative= 'greater')
 print('Significance min_degree & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MAP_5_min_fill, MAP_5_random)
+stat, p = stats.mannwhitneyu(MAP_5_min_fill, MAP_5_random,alternative= 'greater')
 print('Significance min_fill & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
 
 print('---for NET 15')
 
 # Significance distributed:
-stat, p = stats.ttest_ind(MAP_15_min_degree, MAP_15_min_fill)
+stat, p = stats.mannwhitneyu(MAP_15_min_degree, MAP_15_min_fill)
 print('Significance min_degree & min_fill:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MAP_15_min_degree, MAP_15_random)
+stat, p = stats.mannwhitneyu(MAP_15_min_degree, MAP_15_random)
 print('Significance min_degree & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MAP_15_min_fill, MAP_15_random)
+stat, p = stats.mannwhitneyu(MAP_15_min_fill, MAP_15_random)
 print('Significance min_fill & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
 
 print('---for NET 25')
 
 # Significance distributed:
-stat, p = stats.ttest_ind(MAP_25_min_degree, MAP_25_min_fill)
+stat, p = stats.mannwhitneyu(MAP_25_min_degree, MAP_25_min_fill)
 print('Significance min_degree & min_fill:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MAP_25_min_degree, MAP_25_random)
+stat, p = stats.mannwhitneyu(MAP_25_min_degree, MAP_25_random)
 print('Significance min_degree & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MAP_25_min_fill, MAP_25_random)
+stat, p = stats.mannwhitneyu(MAP_25_min_fill, MAP_25_random)
 print('Significance min_fill & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
 
 
@@ -176,32 +176,32 @@ print('---for NET 5')
 
 
 # Significance distributed:
-stat, p = stats.ttest_ind(MPE_5_min_degree, MPE_5_min_fill)
+stat, p = stats.mannwhitneyu(MPE_5_min_degree, MPE_5_min_fill)
 print('Significance min_degree & min_fill:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MPE_5_min_degree, MPE_5_random)
+stat, p = stats.mannwhitneyu(MPE_5_min_degree, MPE_5_random)
 print('Significance min_degree & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MPE_5_min_fill, MPE_5_random)
+stat, p = stats.mannwhitneyu(MPE_5_min_fill, MPE_5_random)
 print('Significance min_fill & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
 
 print('---for NET 15')
 
 # Significance distributed:
-stat, p = stats.ttest_ind(MPE_15_min_degree, MPE_15_min_fill)
+stat, p = stats.mannwhitneyu(MPE_15_min_degree, MPE_15_min_fill)
 print('Significance min_degree & min_fill:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MPE_15_min_degree, MPE_15_random)
+stat, p = stats.mannwhitneyu(MPE_15_min_degree, MPE_15_random)
 print('Significance min_degree & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MPE_15_min_fill, MPE_15_random)
+stat, p = stats.mannwhitneyu(MPE_15_min_fill, MPE_15_random)
 print('Significance min_fill & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
 
 print('---for NET 25')
 
 # Significance distributed:
-stat, p = stats.ttest_ind(MPE_25_min_degree, MPE_25_min_fill)
-print('Significance min_degree & min_fill:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MPE_25_min_degree, MPE_25_random)
-print('Significance min_degree & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
-stat, p = stats.ttest_ind(MPE_25_min_fill, MPE_25_random)
-print('Significance min_fill & random:', 'Statistics=%.3f, p=%.3f' % (stat, p))
+stat, p = stats.mannwhitneyu(MPE_25_min_degree, MPE_25_min_fill,alternative='less')
+print('Significance min_degree & min_fill:', 'Statistics=%.3f, p=%.8f' % (stat, p))
+stat, p = stats.mannwhitneyu(MPE_25_min_degree, MPE_25_random, alternative='less')
+print('Significance min_degree & random:', 'Statistics=%.3f, p=%.8f' % (stat, p))
+stat, p = stats.mannwhitneyu(MPE_25_min_fill, MPE_25_random, alternative='less')
+print('Significance min_fill & random:', 'Statistics=%.3f, p=%.8f' % (stat, p))
 
 
 

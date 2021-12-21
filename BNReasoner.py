@@ -232,7 +232,7 @@ class BNReasoner:
             b = deepcopy(cpt)
         return b, cpt
 
-    def marginals(self,query =None, heuristic= None, evidence = None):
+    def marginals(self,query =None, evidence = None, heuristic= None,):
         x = 'posterior'
         if query is None:
             query = []
@@ -245,10 +245,10 @@ class BNReasoner:
             print("Please provide Query in a list as first parameter")
             sys.exit()
         if heuristic not in ['min_fill', 'random', "min_degree"]:
-            print("Please provide a heuristic as second parameter, options are 'min_fill', 'min_degree', 'random'")
+            print("Please provide a heuristic as third parameter, options are 'min_fill', 'min_degree', 'random'")
             sys.exit()
         if not isinstance(evidence,pd.Series):
-            print('Please provide as a third parameter evidence as [] or pd.Series({"Variable1":"BooleanValue", "Variable2":"BooleanValue", etc.})')
+            print('Please provide as a second parameter evidence as [] or pd.Series({"Variable1":"BooleanValue", "Variable2":"BooleanValue", etc.})')
             sys.exit()
         self.pruning([], query, evidence.index, evidence.values, x)
         thing = self.bn.get_all_cpts()
@@ -290,6 +290,19 @@ class BNReasoner:
             x = "MPE"
         if query == []:
             x = "MPE"
+        if evidence is None:
+            evidence = pd.Series({})
+        if heuristic is None or []:
+            heuristic = 'min_degree'
+        elif not isinstance(query, list):
+            print("Please provide Query in a list as first parameter")
+            sys.exit()
+        if heuristic not in ['min_fill', 'random', "min_degree"]:
+            print("Please provide a heuristic as third parameter, options are 'min_fill', 'min_degree', 'random'")
+            sys.exit()
+        if not isinstance(evidence,pd.Series):
+            print('Please provide as a second parameter evidence as [] or pd.Series({"Variable1":"BooleanValue", "Variable2":"BooleanValue", etc.})')
+            sys.exit()
         self.pruning([], query, evidence.index, evidence.values, x)
         print("pruning done")
         z = self.bn.get_all_cpts()
