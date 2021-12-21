@@ -138,7 +138,7 @@
 <DEFINITION>
 	<FOR>Fatigue</FOR>
 	<GIVEN>Bronchitis</GIVEN>
-	<GIVEN>Obesity</GIVEN>
+	<GIVEN>Lung_cancer</GIVEN>
 	<TABLE>0.70 0.30 0.20 0.80 0.20 0.80 0.10 0.90 </TABLE>
 </DEFINITION>
 
@@ -146,7 +146,7 @@
 	<FOR>Coughing</FOR>
 	<GIVEN>Bronchitis</GIVEN>
 	<GIVEN>Lung_cancer</GIVEN>
-	<TABLE>0.99 0.01 0.40 0.60 0.30 0.70 0.05 0.95 </TABLE>
+	<TABLE>0.99 0.01 0.30 0.70 0.20 0.80 0.05 0.95 </TABLE>
 </DEFINITION>
 
 <DEFINITION>
