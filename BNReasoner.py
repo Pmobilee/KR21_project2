@@ -237,7 +237,7 @@ class BNReasoner:
         if evidence is None:
             evidence = pd.Series({})
         if heuristic is None or []:
-            heuristic = 'min_fill'
+            heuristic = 'min_degree'
         elif not isinstance(query, list):
             print("Please provide Query in a list as first parameter")
             sys.exit()
@@ -253,12 +253,12 @@ class BNReasoner:
             order = self.order(query)
         if heuristic == 'min_degree':
             order = self.get_order(heuristic ='min_degree', query = query)
+            print(query)
         if heuristic == 'min_fill':
             order = self.get_order(heuristic='min_fill', query=query)
         for variable in order:
             mention_keys = []
             mention = []
-
             for key, df in thing.items():
                 if variable in df.columns.tolist():
                     mention.append(df)
@@ -291,6 +291,7 @@ class BNReasoner:
             order = self.order(query)
         if heuristic == 'min_degree':
             order = self.get_order(heuristic ='min_degree', query = query)
+
         if heuristic == 'min_fill':
             order = self.get_order(heuristic='min_fill', query=query)
         print("order done")
