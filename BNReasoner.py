@@ -126,18 +126,19 @@ class BNReasoner:
         return closed_valve, closed_path, d_sep
     
     
-    def pruning(self, x, y, z, truth_value):
+    def pruning(self, x, y, z, truth_value, algorithm):
 
         if isinstance(z,str):
             z1 = []
             z1.insert(0,z)
         else:
             z1 = z
-        #pruning leaf nodes
-        for variable in self.bn.get_all_variables():
-            if self.bn.get_children(variable)==[] and variable not in x and variable not in y and variable not in z1:
-                self.bn.del_var(variable)
-        
+
+        if algorithm != "MPE":
+            for variable in self.bn.get_all_variables():
+                if self.bn.get_children(variable)==[] and variable not in x and variable not in y and variable not in z1:
+                    self.bn.del_var(variable)
+
         #edge pruning
         count = 0
         for var in z1:
@@ -232,8 +233,10 @@ class BNReasoner:
         return b, cpt
 
     def marginals(self,query =None, heuristic= None, evidence = None):
+        x = 'posterior'
         if query is None:
             query = []
+            x = "MPE"
         if evidence is None:
             evidence = pd.Series({})
         if heuristic is None or []:
@@ -247,7 +250,7 @@ class BNReasoner:
         if not isinstance(evidence,pd.Series):
             print('Please provide as a third parameter evidence as [] or pd.Series({"Variable1":"BooleanValue", "Variable2":"BooleanValue", etc.})')
             sys.exit()
-        self.pruning([], query, evidence.index, evidence.values)
+        self.pruning([], query, evidence.index, evidence.values, x)
         thing = self.bn.get_all_cpts()
         if heuristic == 'random':
             order = self.order(query)
@@ -281,9 +284,13 @@ class BNReasoner:
 
 
     def MAP(self,query = None, evidence = pd.Series({}), heuristic = 'random'):
+        x = "MAP"
         if query is None:
             query = []
-        self.pruning([], query, evidence.index, evidence.values)
+            x = "MPE"
+        if query == []:
+            x = "MPE"
+        self.pruning([], query, evidence.index, evidence.values, x)
         print("pruning done")
         z = self.bn.get_all_cpts()
 
