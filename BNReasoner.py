@@ -245,7 +245,7 @@ class BNReasoner:
         if evidence is None:
             evidence = pd.Series({})
         if heuristic is None or []:
-            heuristic = 'min_degree'
+            heuristic = 'random'
         elif not isinstance(query, list):
             print("Please provide Query in a list as first parameter")
             sys.exit()
