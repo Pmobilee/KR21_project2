@@ -20,7 +20,7 @@ import gc
 
 cwd = os.getcwd()
 
-NET_SIZES = [25]
+NET_SIZES = [5, 15, 25]
 ALGORITHMS = ['MAP',"MPE"]
 HEURISTICS = ['min_fill','random','min_degree']
 
@@ -86,6 +86,6 @@ for algorithm in range(len(ALGORITHMS)):
 
     data_end = pd.DataFrame(
         {'size': size_list, "runtime_degree": runtime_degree, "runtime_random":runtime_random,"runtime_minfill":runtime_fill})
-    data_end.to_csv(f'{current_algorithm}.csv')
+    data_end.to_csv(f'{current_algorithm}_{size}.csv')
 
 

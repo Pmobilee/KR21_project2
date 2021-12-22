@@ -5,10 +5,10 @@ from scipy.stats import shapiro
 from scipy import stats
 import numpy as np
 
-
+# Get current working directory
 cwd = os.getcwd()
 
-
+# Read in MAP/MPE results
 MAP_5 = pd.read_csv(f'{cwd}/results/5/MAP.csv')
 MPE_5 = pd.read_csv(f'{cwd}/results/5/MPE.csv')
 
@@ -366,7 +366,7 @@ min = np.min(MPE_25_random)
 print('random:', 'mean:', mean, ',| median:', median, '| sd:', '| max:', max, '| min:', min)
 
 
-# # MAP:
+# # Uncomment for MAP:
 # net5 = []
 # net5.append(MAP_5_min_degree)
 # net5.append(MAP_5_min_fill)
@@ -382,7 +382,7 @@ print('random:', 'mean:', mean, ',| median:', median, '| sd:', '| max:', max, '|
 # net25.append(MAP_25_min_fill)
 # net25.append(MAP_25_random)
 
-#MPE:
+# Uncomment for MPE:
 net5 = []
 net5.append(MPE_5_min_degree)
 net5.append(MPE_5_min_fill)
@@ -418,14 +418,11 @@ left_positions = [-0.6, 1.9, 4.4]
 middle_positions = [0, 2.5, 5]
 right_positions = [0.6, 3.1, 5.6]
 
+# Nice equal distribution on x-axis
 ticks = [0, 2.5, 5]
 labels = ['5 variables', '15 variables', '25 variables']
 
-# x_min = 0
-# x_max = 4
-
-# plt.ylim(np.exp(x_min),np.exp(x_max))
-
+# Lagarithmic x-axis for readability
 plt.yscale('log')
 plt.boxplot(min_degree, positions = left_positions, showfliers=False, )
 plt.boxplot(min_fill, positions = middle_positions, showfliers=False)
