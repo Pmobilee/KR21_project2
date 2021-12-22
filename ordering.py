@@ -14,7 +14,8 @@ import pandas as pd
 from copy import deepcopy
 
 
-# For local testing 
+# This code is for local testing only, see it's implementation in BNReasoner for normal use
+
 cwd = os.getcwd()
 test_file = BNReasoner.BNReasoner(net = f'{cwd}/testing/dog_problem.BIFXML')
 # test_file  = BNReasoner.BNReasoner(net = nx.read_gpickle(f"{cwd}/net25/net25_2.gpickle"))

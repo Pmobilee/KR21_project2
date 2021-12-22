@@ -126,6 +126,7 @@ class BNReasoner:
         return closed_valve, closed_path, d_sep
     
     
+    # Funtion for pruning both edges and leaf nodes given evidence
     def pruning(self, x, y, z, truth_value, algorithm):
 
         if isinstance(z,str):
@@ -155,7 +156,8 @@ class BNReasoner:
             count +=1
         return self
 
-    def order(self, query):
+    # Returns a Random Order (heuristic)
+    def random_ordering(self, query):
         variables = self.bn.get_all_variables()
         if "p" in variables:
             self.bn.del_var('p')
@@ -192,6 +194,7 @@ class BNReasoner:
         a = a.dropna(subset = ["factor"], inplace=False).reset_index(drop=True)
         return a
 
+    # Summing out a variable, returns a new dataframe without that variable
     def summing_out(self, cpt, variable):
         if len(cpt.index) == 1:
             df_new = cpt.drop(variable, axis = 1)
@@ -209,6 +212,7 @@ class BNReasoner:
             df_new = df.groupby(groups, as_index=False).aggregate(agg).reindex(columns=df.columns)
         return df_new
 
+    # Maxes out over a variable and returns the new CPT
     def maxing_out(self, cpt,variable):
         row = len(cpt.index)
         before = deepcopy(cpt)
@@ -232,6 +236,7 @@ class BNReasoner:
             b = deepcopy(cpt)
         return b, cpt
 
+    # Calculates marginals, optional query, evidence, and heuristic to be defined
     def marginals(self,query =None, evidence = None, heuristic= None,):
         x = 'posterior'
         if query is None:
@@ -253,7 +258,7 @@ class BNReasoner:
         self.pruning([], query, evidence.index, evidence.values, x)
         thing = self.bn.get_all_cpts()
         if heuristic == 'random':
-            order = self.order(query)
+            order = self.random_ordering(query)
         if heuristic == 'min_degree':
             order = self.get_order(heuristic ='min_degree', query = query)
             print(query)
@@ -283,6 +288,7 @@ class BNReasoner:
         return thing[name]
 
 
+    # Function for calculating MAP, requires evidence, and a possible query and heuristic to utilize
     def MAP(self,query = None, evidence = pd.Series({}), heuristic = 'random'):
         x = "MAP"
         if query is None:
@@ -308,7 +314,7 @@ class BNReasoner:
         z = self.bn.get_all_cpts()
 
         if heuristic == 'random':
-            order = self.order(query)
+            order = self.random_ordering(query)
         if heuristic == 'min_degree':
             order = self.get_order(heuristic ='min_degree', query = query)
 
@@ -366,7 +372,7 @@ class BNReasoner:
             z.pop(list(z.keys())[0])
         return b,ins
     
-
+    # Quick function to check new vs existing edges 
     def filter_(self, x, y):
         count = 0
         for edge in x:

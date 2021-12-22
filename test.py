@@ -17,6 +17,7 @@ from copy import deepcopy
 cwd = os.getcwd()
 
 
+# This tests if the networks generated contain the correct amount of variables
 
 for x in range(100):
     filenames = f'{cwd}/net25/net25_{x}gpickle'
